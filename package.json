@@ -1,0 +1,20 @@
+{
+  "name": "aws-lambda-memcached",
+  "version": "1.0.0",
+  "description": "Example lambda-memcached",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OskrOne/aws-lambda-memcached.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OskrOne/aws-lambda-memcached/issues"
+  },
+  "homepage": "https://github.com/OskrOne/aws-lambda-memcached#readme",
+  "dependencies": {
+    "memjs": "^1.3.0"
+  }
+}
