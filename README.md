@@ -1,6 +1,3 @@
 # aws-lambda-memcached
 
-## Deploy
-
-npm install
-sls deploy
+[Dev to post](dev.to.md)
