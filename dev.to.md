@@ -4,11 +4,11 @@ Hoy en día, las aplicaciones que tienen un contacto directo con el usuario, por
 
 Ejecutar una consulta en una base de datos con múltiples joins o consultar una API externa puede ser costoso, es entonces cuando es muy beneficioso usar caché, para responder de manera óptima al cliente.
 
-AWS ElastiCache es un servicio totalmente administrado para almacenar datos en memoria, ya sea Memcached o Redis
+Este es un ejemplo de como usar AWS ElastiCache a través de una Lambda en una red privada
 
 ## Caso de uso
 
-El siguiente ejemplo se compone de las siguientes características
+El caso de uso se compone de las siguientes características
 
 * Cluster de memcached en una red privada
 * Multi AZ deployment para garantizar alta disponilidad y tolerancia a fallos
@@ -19,13 +19,14 @@ El siguiente ejemplo se compone de las siguientes características
 
 Antes de comenzar con la solución es importante mencionar todos los servicios de AWS que se usarán en conjunto
 
-* VPC: Red privada en AWS compuesta por 2 subnets privadas y 2 subnets públicas
-* Internet Gateway: Gateway redundante y de alta dispobilidad que permite la comunicación entre Internet y la VPC
-* NAT Gateway: Gateway que permite a subnets privadas conectarse a Internet, pero no permite que desde Internet se alcance la red privada.
-* ElastiCache: Almacenamiento en memoria, para este caso usaremos el motor de memcached
-* Lambda: Cómputo sin servidor ejecutándose en una red privada para poder acceder al cluster de memcached
+* [VPC](https://aws.amazon.com/vpc): Red privada en AWS compuesta por 2 subnets privadas y 2 subnets públicas
+* [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html): Gateway redundante y de alta dispobilidad que permite la comunicación entre Internet y la VPC
+* [NAT Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html): Gateway que permite a subnets privadas conectarse a Internet, pero no permite que desde Internet se alcance la red privada.
+* [ElastiCache](https://docs.aws.amazon.com/elasticache/index.html): Almacenamiento en memoria, para este caso usaremos el motor de memcached
+* [Lambda](https://aws.amazon.com/lambda/getting-started/): Cómputo sin servidor ejecutándose en una red privada para poder acceder al cluster de memcached
 
 En conjunto se ve así:
+![Alt Text](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ol1f9g4x7nem4de8namj.png)
 
 Aquí unos detalles importantes a mencionar
 
@@ -36,9 +37,9 @@ Aquí unos detalles importantes a mencionar
 
 ## Implementación
 
-Todos los recursos los podemos definir a través de Cloud Formation y para poder hacer deployment, para facilitar el ejemplo, podemos usar Serverless Framework
+Todos los recursos los podemos definir a través de [Cloud Formation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html) y para poder hacer deployment, para facilitar el ejemplo, podemos usar Serverless Framework
 
-Todo el código está en GitHub, aquí algunos fragmentos que ayudan a explicar el ejemplo
+Todo el código está en [GitHub](https://github.com/OskrOne/aws-lambda-memcached), aquí algunos fragmentos que ayudan a explicar el ejemplo
 
 La primera dependencia de un cluster de elasticache es un subnet group en donde se definen las subnets que se usarán, en este caso, para garantizar la seguridad, se usan las subnets privadas
 ```yaml
@@ -93,7 +94,7 @@ Finalmente, la definición del cluster
         - Ref: SecurityGroupMemcached
 ```
 
-Es momento de hablar de la lambda, esta lambda se debe de instanciar dentro de la VPC en las subnets privadas, para lograr esto, lo definiremos a través de serverlesss.
+Es momento de hablar de la lambda, esta lambda se debe de instanciar dentro de la VPC en las subnets privadas, para lograr esto, lo definiremos a través de [Serverlesss Framework](https://www.serverless.com/)
 
 ```yaml
 functions:
@@ -141,7 +142,7 @@ module.exports.handler = async(event) => {
 };
 ```
 
-Como estrategia de caching, se usa Lazy loading, es decir, como primer paso se verifica si los datos existen en caché, si existe, se devuelve el dato, si no existe, se obtiene de la fuente y se agrega a caché. A pesar de que la lambda está dentro de una red privada, puede acceder a internet a través de la NAT Gateway!
+Como estrategia de caching, se usa [Lazy loading](https://docs.aws.amazon.com/AmazonElastiCache/latest/mem-ug/Strategies.html), es decir, como primer paso se verifica si los datos existen en caché, si existe, se devuelve el dato, si no existe, se obtiene de la fuente y se agrega a caché. A pesar de que la lambda está dentro de una red privada, puede acceder a internet a través de la NAT Gateway!
 
 ## Despliegue
 
